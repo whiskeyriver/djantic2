@@ -1,13 +1,21 @@
 from typing import Optional
 
 import pytest
-from pydantic import ConfigDict
-from testapp.models import Configuration, Listing, Preference, Record, Searchable, User, NullableChar, NullableFK
-
 from pydantic import (
+    ConfigDict,
+    ValidationError,
     ValidationInfo,
     field_validator,
-    ValidationError,
+)
+from testapp.models import (
+    Configuration,
+    Listing,
+    NullableChar,
+    NullableFK,
+    Preference,
+    Record,
+    Searchable,
+    User,
 )
 
 from djantic import ModelSchema
@@ -43,25 +51,21 @@ def test_schema_without_include_and_exclude():
 
 @pytest.mark.django_db
 def test_context_for_field():
-
     def get_context():
-        return {'check_title': lambda x: x.istitle()}
+        return {"check_title": lambda x: x.istitle()}
 
     class UserSchema(ModelSchema):
-        model_config = ConfigDict(
-            model=User,
-            revalidate_instances='always'
-        )
+        model_config = ConfigDict(model=User, revalidate_instances="always")
 
-        @field_validator('first_name', mode="before", check_fields=False)
+        @field_validator("first_name", mode="before", check_fields=False)
         @classmethod
         def validate_first_name(cls, v: str, info: ValidationInfo):
             if not info.context:
                 return v
 
-            check_title = info.context.get('check_title')
+            check_title = info.context.get("check_title")
             if check_title and not check_title(v):
-                raise ValueError('First name needs to be a title')
+                raise ValueError("First name needs to be a title")
             return v
 
     user = User.objects.create(first_name="hello", email="a@a.com")
@@ -415,11 +419,11 @@ def test_listing():
 @pytest.mark.django_db
 def test_nullable_fk():
     class NullableCharSchema(ModelSchema):
-        model_config = ConfigDict(model=NullableChar, include='value')
+        model_config = ConfigDict(model=NullableChar, include="value")
 
     class NullableFKSchema(ModelSchema):
         nullable_char: Optional[NullableCharSchema] = None
-        model_config = ConfigDict(model=NullableFK, include='nullable_char')
+        model_config = ConfigDict(model=NullableFK, include="nullable_char")
 
     nullable_char = NullableChar(value="test")
     nullable_char.save()

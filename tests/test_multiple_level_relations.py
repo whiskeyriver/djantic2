@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import List, Optional
 
 import pytest
-from pydantic import validator
+from pydantic import ConfigDict, Field, field_validator
 from testapp.order import (
     Order,
     OrderItem,
@@ -12,7 +12,6 @@ from testapp.order import (
     OrderUserProfile,
 )
 
-from pydantic import ConfigDict
 from djantic import ModelSchema
 
 
