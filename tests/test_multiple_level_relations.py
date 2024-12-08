@@ -34,7 +34,7 @@ def test_multiple_level_relations():
     class OrderUserSchema(ModelSchema):
         orders: List[OrderSchema]
         profile: OrderUserProfileSchema
-        user_cache: Optional[dict]
+        user_cache: Optional[dict] = Field(None, validate_default=True)
         model_config = ConfigDict(
             model=OrderUser,
             include=(
@@ -48,13 +48,13 @@ def test_multiple_level_relations():
             ),
         )
 
-        @validator("user_cache", pre=True, always=True)
+        @field_validator("user_cache", mode="before")
         def get_user_cache(cls, _):
             return {"has_order": True}
 
     user = OrderUserFactory.create()
 
-    assert OrderUserSchema.from_django(user).dict() == {
+    assert OrderUserSchema.from_django(user).model_dump() == {
         "profile": {"id": 1, "address": "", "user": 1},
         "orders": [
             {
