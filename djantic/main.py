@@ -124,7 +124,6 @@ class ModelSchemaMetaclass(ModelMetaclass):
                     field_values[field_name] = (python_type, pydantic_field)
 
                 cls.__doc__ = namespace.get("__doc__", config["model"].__doc__)
-                cls.model_fields = {}
                 cls.__alias_map__ = {
                     getattr(model_field[1], "alias", None) or field_name: field_name
                     for field_name, model_field in field_values.items()
